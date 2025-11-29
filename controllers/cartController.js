@@ -1,40 +1,44 @@
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
 
+// POST /api/cart/add
 export const addToCart = async (req, res) => {
   try {
     const { productId, size, qty } = req.body;
-    const userId = req.user._id;
 
-    const product = await Product.findById(productId);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-
-    let cart = await Cart.findOne({ user: userId });
-
-    if (!cart) {
-      cart = await Cart.create({
-        user: userId,
-        items: [{ product: productId, size, qty }]
-      });
-    } else {
-      const exist = cart.items.find(
-        (i) => i.product.toString() === productId && i.size === size
-      );
-
-      if (exist) {
-        exist.qty += qty;
-      } else {
-        cart.items.push({ product: productId, size, qty });
-      }
-
-      await cart.save();
+    if (!productId || !size || !qty) {
+      return res.status(400).json({ message: "Missing fields" });
     }
 
-    res.json({ message: "Added to cart", cart });
+    let cart = await Cart.findOne({ user: req.user._id });
+
+    // If cart doesn't exist, create one
+    if (!cart) {
+      cart = new Cart({
+        user: req.user._id,
+        items: [],
+      });
+    }
+
+    const existingItem = cart.items.find(
+      (i) =>
+        i.product.toString() === productId &&
+        i.size === size
+    );
+
+    if (existingItem) {
+      existingItem.qty += qty;
+    } else {
+      cart.items.push({ product: productId, size, qty });
+    }
+
+    await cart.save();
+    res.json({ message: "Item added", cart });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 export const getCart = async (req, res) => {
   try {
