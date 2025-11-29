@@ -26,6 +26,8 @@ app.use(
     credentials: true,
   })
 );
+app.options("*", cors());
+
 
 // Routes
 app.use("/api/auth", authRoutes);
