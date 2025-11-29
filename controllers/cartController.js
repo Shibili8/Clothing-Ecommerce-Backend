@@ -9,10 +9,11 @@ export const getCart = async (req, res) => {
 export const addToCart = async (req, res) => {
   const userId = req.user._id;
   const { productId, size, qty } = req.body;
-
+    console.log("Reached")
   if (!productId || !size || !qty) {
     return res.status(400).json({ message: "Missing fields" });
   }
+  
 
   let cart = await Cart.findOne({ user: userId });
   if (!cart) cart = new Cart({ user: userId, items: [] });
