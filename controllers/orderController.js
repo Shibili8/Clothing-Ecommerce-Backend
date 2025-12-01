@@ -48,8 +48,8 @@ export const createOrder = async (req, res) => {
     await cart.save();
 
     // Do NOT block response
-    sendOrderEmail(order, req.user).catch((err) =>
-      console.log("Email Error:", err)
+    sendOrderEmail(order, req.user).catch(err =>
+      console.log("Email error:", err)
     );
 
     res.status(201).json(order);
