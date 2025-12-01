@@ -1,28 +1,22 @@
-import nodemailer from "nodemailer";
-import sgTransport from "nodemailer-sendgrid";
+import sgMail from "@sendgrid/mail";
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const sendOrderEmail = async (order, user) => {
   try {
-    const transporter = nodemailer.createTransport(
-      sgTransport({
-        apiKey: process.env.SENDGRID_API_KEY,
-      })
-    );
-
-    const mailOptions = {
-      from: process.env.SENDER_EMAIL,
+    await sgMail.send({
       to: user.email,
-      subject: "Order Confirmation",
+      from: process.env.SENDER_EMAIL, // must be verified in SendGrid
+      subject: "Order Successful!",
       html: `
-        <h2>Order Successful!</h2>
-        <p>Order ID: <strong>${order._id}</strong></p>
-        <p>Total Price: ₹${order.totalPrice}</p>
+        <h2>Your order was placed successfully!</h2>
+        <p><strong>Order ID:</strong> ${order._id}</p>
+        <p><strong>Total Price:</strong> ₹${order.totalPrice}</p>
       `,
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log("Email sent!");
+    console.log("Order email sent.");
   } catch (err) {
-    console.log("SendGrid Email Error:", err);
+    console.error("SendGrid Email Error:", err.response?.body || err);
   }
 };
