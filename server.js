@@ -20,25 +20,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// CORS — FINAL WORKING CONFIG
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://clothing-ecommerce-frontend-url.com"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: "http://localhost:3000", // FRONTEND LOCAL
     credentials: true,
   })
 );
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Credentials", "true");
-  next();
-});
-
-
-app.options("*", (req, res) => {
-  res.sendStatus(200);
-});
-
-
 
 // Routes
 app.use("/api/auth", authRoutes);
