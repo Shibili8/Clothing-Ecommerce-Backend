@@ -54,9 +54,10 @@ export const addToCart = async (req, res) => {
 
 export const getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne({ user: req.user._id }).populate(
-      "items.product"
-    );
+    const cart = await Cart.findOne({ user: req.user._id })
+      .populate("items.product");
+
+    console.log("CART FROM DB:", JSON.stringify(cart, null, 2));  // DEBUG
 
     if (!cart) return res.json({ items: [] });
 
@@ -72,9 +73,10 @@ export const getCart = async (req, res) => {
       })),
     });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
+
 
 
 export const updateCartItem = async (req, res) => {
