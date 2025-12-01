@@ -7,11 +7,13 @@ export const sendOrderEmail = async (order, user) => {
     await sgMail.send({
       to: user.email,
       from: process.env.SENDER_EMAIL, // must be verified in SendGrid
-      subject: "Order Successful!",
+      subject: `Order Confirmation #${order._id}`,
       html: `
-        <h2>Your order was placed successfully!</h2>
+        <h2>Thank you for your order, ${user.name}!</h2>
+        <p>We've received your order and are processing it.</p>
         <p><strong>Order ID:</strong> ${order._id}</p>
-        <p><strong>Total Price:</strong> ₹${order.totalPrice}</p>
+        <p><strong>Total:</strong> ₹${order.totalPrice}</p>
+        <p>We’ll notify you when it ships.</p>
       `,
     });
 
