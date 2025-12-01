@@ -1,32 +1,50 @@
 import nodemailer from "nodemailer";
 
 export const sendOrderEmail = async (order, user) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-  });
+  try {
+    // Create SMTP transporter
+    const transporter = nodemailer.createTransport({
+      host: process.env.SENDGRID_HOST,
+      port: Number(process.env.SENDGRID_PORT),
+      secure: false, // must be false for port 587
+      auth: {
+        user: process.env.SENDGRID_USER,
+        pass: process.env.SENDGRID_PASS,
+      },
+    });
 
-  const itemsHtml = order.items
-    .map(
-      (item) =>
-        `<p>${item.name} (${item.size}) x${item.qty} - ₹${item.price}</p>`
-    )
-    .join("");
+    // Email content
+    const mailOptions = {
+      from: process.env.MAIL_FROM,
+      to: user.email,
+      subject: "Order Confirmation",
+      html: `
+        <h2>Order Confirmed 🎉</h2>
+        <p>Hi <b>${user.name}</b>,</p>
+        
+        <p>Your order has been placed successfully!</p>
+        
+        <h3>Order ID: ${order._id}</h3>
+        <h3>Total Price: ₹${order.totalPrice}</h3>
+        
+        <h4>Items:</h4>
+        <ul>
+          ${order.items
+            .map(
+              (item) =>
+                `<li>${item.name} (${item.size}) × ${item.qty} — ₹${item.price}</li>`
+            )
+            .join("")}
+        </ul>
 
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: user.email,
-    subject: `Order Confirmation - #${order._id}`,
-    html: `
-      <h1>Thank you for your order!</h1>
-      <p>Order ID: ${order._id}</p>
-      <p>Date: ${new Date(order.orderDate).toLocaleDateString()}</p>
-      <h3>Items:</h3>
-      ${itemsHtml}
-      <h2>Total: ₹${order.totalPrice}</h2>
-      <p>We appreciate your purchase 🛍️</p>
-    `,
-  };
+        <p>Thank you for shopping with us! ❤️</p>
+      `,
+    };
 
-  await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
+
+    console.log("SendGrid Email Sent!");
+  } catch (error) {
+    console.error("SendGrid Email Error:", error);
+  }
 };
