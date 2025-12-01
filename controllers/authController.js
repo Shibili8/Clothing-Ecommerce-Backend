@@ -1,42 +1,48 @@
 import crypto from "crypto";
 import User from "../models/User.js";
-import nodemailer from "nodemailer";
 import generateToken from "../utils/generateToken.js";
-import jwt from "jsonwebtoken";
-import sendResetEmail from "../utils/sendResetEmail.js"; // new unified email sender
+import sendResetEmail from "../utils/sendResetEmail.js"; // SendGrid email sender
 
-
+// =======================
+// REGISTER
+// =======================
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     const exists = await User.findOne({ email });
-    
-    if (exists)
+    if (exists) {
       return res.status(400).json({ message: "User already exists" });
+    }
 
     const user = await User.create({ name, email, password });
-    
+
+    // Set JWT cookie
     generateToken(res, user._id);
 
-    return res.status(201).json({
+    res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
     });
-
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
+// =======================
+// LOGIN
+// =======================
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
+
     if (!user || !(await user.matchPassword(password))) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res
+        .status(401)
+        .json({ message: "Invalid email or password" });
     }
 
     generateToken(res, user._id);
@@ -44,22 +50,35 @@ export const loginUser = async (req, res) => {
     res.json({
       _id: user._id,
       name: user.name,
-      email: user.email
+      email: user.email,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
+// =======================
+// LOGOUT
+// =======================
 export const logoutUser = (req, res) => {
-  res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) });
+  res.cookie("jwt", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+
   res.json({ message: "Logged out" });
 };
 
+// =======================
+// GET PROFILE
+// =======================
 export const getProfile = (req, res) => {
   res.json(req.user);
 };
 
+// =======================
+// FORGOT PASSWORD
+// =======================
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -68,50 +87,59 @@ export const forgotPassword = async (req, res) => {
     if (!user)
       return res.status(404).json({ message: "User not found" });
 
-    // Create raw token (NOT JWT anymore)
+    // 1️⃣ Create Reset Token
     const resetToken = crypto.randomBytes(32).toString("hex");
 
-    // Hash the token before saving
-    const hashedToken = crypto
+    // 2️⃣ Hash token for DB
+    const hashed = crypto
       .createHash("sha256")
       .update(resetToken)
       .digest("hex");
 
-    user.resetPasswordToken = hashedToken;
+    user.resetPasswordToken = hashed;
     user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 mins
+
     await user.save();
 
-    // Link sent to frontend
+    // 3️⃣ Create reset URL
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
-    // Send email using SendGrid
+    // 4️⃣ Send email via SendGrid
     await sendResetEmail(user.email, resetLink);
 
-    res.json({ message: "Password reset link sent to your email." });
+    res.json({
+      message: "Password reset link sent to your email.",
+    });
   } catch (err) {
     console.error("Forgot Password Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
+// =======================
+// RESET PASSWORD
+// =======================
 export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
 
-    // Hash token to compare with DB
+    // Hash incoming token
     const hashedToken = crypto
       .createHash("sha256")
       .update(token)
       .digest("hex");
 
+    // Find user with valid token
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: Date.now() } // Check expiry
+      resetPasswordExpires: { $gt: Date.now() },
     });
 
     if (!user)
-      return res.status(400).json({ message: "Invalid or expired token" });
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired token" });
 
     // Update password
     user.password = password;
@@ -126,4 +154,3 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
