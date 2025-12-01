@@ -28,6 +28,15 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  res.setTimeout(45000, () => {
+    console.log("Request timed out");
+    res.status(504).json({ message: "Server timeout" });
+  });
+  next();
+});
+
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
