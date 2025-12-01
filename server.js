@@ -22,12 +22,22 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: ["http://localhost:3000", "https://clothing-ecommerce-frontend-url.com"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
 
-app.options("*", cors());
+
+app.options("*", (req, res) => {
+  res.sendStatus(200);
+});
+
 
 
 // Routes
