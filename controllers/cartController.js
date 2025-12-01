@@ -5,7 +5,7 @@ import Product from "../models/Product.js";
 export const addToCart = async (req, res) => {
   try {
     const { productId, size, qty } = req.body;
-
+    console.log("Authenticated user:", req.user);
     if (!productId || !size || !qty) {
       return res.status(400).json({ message: "Missing fields" });
     }
