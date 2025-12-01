@@ -57,7 +57,6 @@ export const getCart = async (req, res) => {
     const cart = await Cart.findOne({ user: req.user._id })
       .populate("items.product");
 
-    console.log("CART FROM DB:", JSON.stringify(cart, null, 2));  // DEBUG
 
     if (!cart) return res.json({ items: [] });
 
