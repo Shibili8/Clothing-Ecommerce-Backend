@@ -1,25 +1,32 @@
+import mongoose from "mongoose";
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
 
-// POST /api/cart/add
 export const addToCart = async (req, res) => {
   try {
     const { productId, size, qty } = req.body;
-    console.log("Authenticated user:", req.user);
+
     if (!productId || !size || !qty) {
       return res.status(400).json({ message: "Missing fields" });
     }
 
-    let cart = await Cart.findOne({ user: req.user._id });
+    // Convert to ObjectId (IMPORTANT)
+    const productObjectId = new mongoose.Types.ObjectId(productId);
 
-    // If cart doesn't exist, create one
+    // Ensure user exists
+    const userId = req.user._id;
+
+    let cart = await Cart.findOne({ user: userId });
+
+    // If no cart, create new one
     if (!cart) {
       cart = new Cart({
-        user: req.user._id,
+        user: userId,
         items: [],
       });
     }
 
+    // Check if item with same product+size already exists
     const existingItem = cart.items.find(
       (i) =>
         i.product.toString() === productId &&
@@ -29,25 +36,30 @@ export const addToCart = async (req, res) => {
     if (existingItem) {
       existingItem.qty += qty;
     } else {
-      cart.items.push({ product: productId, size, qty });
+      cart.items.push({
+        product: productObjectId, // <-- FIX
+        size,
+        qty,
+      });
     }
 
     await cart.save();
-    res.json({ message: "Item added", cart });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+
+    return res.json({ message: "Item added", cart });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };
 
 
 export const getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne({ user: req.user._id })
-      .populate("items.product");
+    const cart = await Cart.findOne({ user: req.user._id }).populate(
+      "items.product"
+    );
 
     if (!cart) return res.json({ items: [] });
 
-    // Format items to match frontend
     res.json({
       items: cart.items.map((item) => ({
         _id: item._id,
@@ -56,19 +68,20 @@ export const getCart = async (req, res) => {
         price: item.product.price,
         image: item.product.image,
         size: item.size,
-        qty: item.qty
-      }))
+        qty: item.qty,
+      })),
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
+
+
 export const updateCartItem = async (req, res) => {
   try {
     const { productId, size, qty } = req.body;
-    const userId = req.user._id;
 
-    let cart = await Cart.findOne({ user: userId });
+    const cart = await Cart.findOne({ user: req.user._id });
     if (!cart) return res.status(404).json({ message: "Cart not found" });
 
     const item = cart.items.find(
@@ -82,9 +95,11 @@ export const updateCartItem = async (req, res) => {
 
     res.json({ message: "Quantity updated", cart });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
+
+
 export const removeCartItem = async (req, res) => {
   try {
     const { productId, size } = req.body;
@@ -100,6 +115,6 @@ export const removeCartItem = async (req, res) => {
 
     res.json({ message: "Item removed", cart });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
