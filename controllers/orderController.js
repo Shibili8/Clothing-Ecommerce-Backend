@@ -12,8 +12,6 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    // Optional: Validate stock & decrement
-    // (simple version)
     for (const item of cart.items) {
       if (item.product.stock < item.qty) {
         return res.status(400).json({
@@ -46,16 +44,18 @@ export const createOrder = async (req, res) => {
       totalPrice,
     });
 
-    // Clear cart
     cart.items = [];
     await cart.save();
 
-    // Send email
-    await sendOrderEmail(order, req.user);
+    // Do NOT block response
+    sendOrderEmail(order, req.user).catch((err) =>
+      console.log("Email Error:", err)
+    );
 
     res.status(201).json(order);
   } catch (err) {
-    console.error(err);
+    console.error("ORDER ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 };
+
