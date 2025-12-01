@@ -5,31 +5,33 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 export const sendOrderEmail = async (order, user) => {
   const msg = {
     to: user.email,
-    from: process.env.SENDER_EMAIL, // Must be verified sender
-    subject: `Order Confirmation - ${order._id}`,
+    from: process.env.SENDER_EMAIL, // Must be verified SendGrid sender
+    subject: "Your Order is Successful!",
     html: `
-      <h2>Thank you for your order!</h2>
-      <p>Order ID: <strong>${order._id}</strong></p>
-      
-      <h3>Order Items:</h3>
+      <h2>Order Successful</h2>
+      <p>Hi ${user.name},</p>
+      <p>Your order has been placed successfully.</p>
+      <p><b>Order ID:</b> ${order._id}</p>
+      <p><b>Total:</b> ₹${order.totalPrice}</p>
+
+      <h3>Items:</h3>
       <ul>
         ${order.items
           .map(
-            (i) =>
-              `<li>${i.name} (Size: ${i.size}) × ${i.qty} — ₹${i.price}</li>`
+            (item) =>
+              `<li>${item.name} (${item.size}) × ${item.qty} — ₹${item.price}</li>`
           )
           .join("")}
       </ul>
 
-      <p>Total Price: <strong>₹${order.totalPrice}</strong></p>
-      <p>We will notify you once your order is shipped.</p>
+      <p>Thank you for shopping with us!</p>
     `,
   };
 
   try {
     await sgMail.send(msg);
-    console.log("SendGrid email: SUCCESS");
+    console.log("Order email sent!");
   } catch (err) {
-    console.error("SendGrid Error:", err.response?.body || err.message);
+    console.error("SendGrid Email Error:", err);
   }
 };
