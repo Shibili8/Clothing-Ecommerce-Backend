@@ -23,18 +23,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CORS — FINAL WORKING CONFIG
+// ✅ CORS — FINAL WORKING CONFIG (INCLUDES YOUR VERCEL DOMAIN)
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://clothing-ecommerce-frontend.onrender.com"  // <-- UPDATE THIS
+      "https://clothing-ecommerce-frontend.onrender.com",
+      "https://clothing-ecommerce-app-mohammed-shi.vercel.app"  // ← REQUIRED FOR LOGIN
     ],
     credentials: true,
   })
 );
 
-// Optional: Avoid long hung requests on Render
+// Optional timeout
 app.use((req, res, next) => {
   res.setTimeout(45000, () => {
     console.log("Request timed out");
