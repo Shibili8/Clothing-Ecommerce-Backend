@@ -23,7 +23,7 @@ app.use(cookieParser());
 // CORS — FINAL WORKING CONFIG
 app.use(
   cors({
-    origin: "https://clothing-ecommerce-app-mohammed-shi.vercel.app/", // FRONTEND LOCAL
+    origin: [process.env.CLIENT_URL, "http://localhost:3000"],
     credentials: true,
   })
 );
