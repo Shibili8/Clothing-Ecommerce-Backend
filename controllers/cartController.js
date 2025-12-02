@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import Cart from "../models/Cart.js";
-import Product from "../models/Product.js";
 
 export const addToCart = async (req, res) => {
   try {
@@ -10,15 +9,12 @@ export const addToCart = async (req, res) => {
       return res.status(400).json({ message: "Missing fields" });
     }
 
-    // Convert to ObjectId (IMPORTANT)
     const productObjectId = new mongoose.Types.ObjectId(productId);
 
-    // Ensure user exists
     const userId = req.user._id;
 
     let cart = await Cart.findOne({ user: userId });
 
-    // If no cart, create new one
     if (!cart) {
       cart = new Cart({
         user: userId,
@@ -26,7 +22,6 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // Check if item with same product+size already exists
     const existingItem = cart.items.find(
       (i) =>
         i.product.toString() === productId &&
@@ -37,7 +32,7 @@ export const addToCart = async (req, res) => {
       existingItem.qty += qty;
     } else {
       cart.items.push({
-        product: productObjectId, // <-- FIX
+        product: productObjectId,
         size,
         qty,
       });

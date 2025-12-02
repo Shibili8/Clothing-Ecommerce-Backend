@@ -12,10 +12,8 @@ import { notFound, errorHandler } from "./middleware/errorHandler.js";
 dotenv.config();
 const app = express();
 
-// TRUST PROXY MUST COME FIRST (Render requirement)
 app.set("trust proxy", 1);
 
-// DB
 connectDB();
 
 // Middlewares
@@ -23,19 +21,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// ✅ CORS — FINAL WORKING CONFIG (INCLUDES YOUR VERCEL DOMAIN)
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
       "https://clothing-ecommerce-frontend.onrender.com",
-      "https://clothing-ecommerce-app-mohammed-shi.vercel.app"  // ← REQUIRED FOR LOGIN
+      "https://clothing-ecommerce-app-mohammed-shi.vercel.app" 
     ],
     credentials: true,
   })
 );
 
-// Optional timeout
 app.use((req, res, next) => {
   res.setTimeout(45000, () => {
     console.log("Request timed out");

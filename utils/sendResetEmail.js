@@ -1,4 +1,3 @@
-// utils/sendResetEmail.js
 import sgMail from "@sendgrid/mail";
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -6,7 +5,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const sendResetEmail = async (to, link) => {
   const msg = {
     to,
-    from: process.env.SENDER_EMAIL, // must be verified
+    from: process.env.SENDER_EMAIL,
     subject: "Password Reset Request",
     html: `
       <h2>Reset Your Password</h2>

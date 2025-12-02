@@ -12,7 +12,7 @@ router.get("/me", protect, getProfile);
 router.get("/test", (req, res) => {
   res.send("Auth API working");
 });
-// Forgot + Reset Password (correct order)
+
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 

@@ -10,7 +10,7 @@ const connectDB = async () => {
 
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 30000, // 30 sec
+      serverSelectionTimeoutMS: 30000, 
       socketTimeoutMS: 30000,
       connectTimeoutMS: 30000,
     });
@@ -19,8 +19,6 @@ const connectDB = async () => {
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (err) {
     console.error("MongoDB Initial Connection Error:", err.message);
-
-    // 🔁 Retry after 5 sec (avoids Render cold start crash)
     setTimeout(connectDB, 5000);
   }
 };
@@ -32,7 +30,6 @@ mongoose.connection.on("disconnected", () => {
   connectDB();
 });
 
-// ❗ Log low-level errors
 mongoose.connection.on("error", (err) => {
   console.error("MongoDB error:", err.message);
 });

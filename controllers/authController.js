@@ -3,9 +3,11 @@ import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 import sendResetEmail from "../utils/sendResetEmail.js"; // SendGrid email sender
 
-// =======================
-// REGISTER
-// =======================
+export const getProfile = (req, res) => {
+  res.json(req.user);
+};
+
+
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -17,7 +19,6 @@ export const registerUser = async (req, res) => {
 
     const user = await User.create({ name, email, password });
 
-    // Set JWT cookie
     generateToken(res, user._id);
 
     res.status(201).json({
@@ -30,9 +31,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// =======================
-// LOGIN
-// =======================
+
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -45,7 +44,6 @@ export const loginUser = async (req, res) => {
         .json({ message: "Invalid email or password" });
     }
 
-    // Set JWT httpOnly cookie
     generateToken(res, user._id);
 
     return res.status(200).json({
@@ -64,9 +62,6 @@ export const loginUser = async (req, res) => {
 };
 
 
-// =======================
-// LOGOUT
-// =======================
 export const logoutUser = (req, res) => {
   res.cookie("jwt", "", {
     httpOnly: true,
@@ -76,16 +71,7 @@ export const logoutUser = (req, res) => {
   res.json({ message: "Logged out" });
 };
 
-// =======================
-// GET PROFILE
-// =======================
-export const getProfile = (req, res) => {
-  res.json(req.user);
-};
 
-// =======================
-// FORGOT PASSWORD
-// =======================
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -94,24 +80,18 @@ export const forgotPassword = async (req, res) => {
     if (!user)
       return res.status(404).json({ message: "User not found" });
 
-    // 1️⃣ Create Reset Token
     const resetToken = crypto.randomBytes(32).toString("hex");
 
-    // 2️⃣ Hash token for DB
     const hashed = crypto
       .createHash("sha256")
       .update(resetToken)
       .digest("hex");
 
     user.resetPasswordToken = hashed;
-    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 mins
+    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
 
     await user.save();
-
-    // 3️⃣ Create reset URL
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
-
-    // 4️⃣ Send email via SendGrid
     await sendResetEmail(user.email, resetLink);
 
     res.json({
@@ -123,21 +103,17 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-// =======================
-// RESET PASSWORD
-// =======================
+
 export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
 
-    // Hash incoming token
     const hashedToken = crypto
       .createHash("sha256")
       .update(token)
       .digest("hex");
 
-    // Find user with valid token
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
       resetPasswordExpires: { $gt: Date.now() },
@@ -148,7 +124,6 @@ export const resetPassword = async (req, res) => {
         .status(400)
         .json({ message: "Invalid or expired token" });
 
-    // Update password
     user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;

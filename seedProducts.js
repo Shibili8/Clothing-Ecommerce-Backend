@@ -48,11 +48,11 @@ const seed = async () => {
     console.log("Old products removed.");
 
     await Product.insertMany(products);
-    console.log("✅ Products seeded successfully!");
+    console.log("Products seeded successfully!");
 
     process.exit();
   } catch (err) {
-    console.error("❌ Seeding error:", err);
+    console.error("Seeding error:", err);
     process.exit(1);
   }
 };

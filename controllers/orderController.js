@@ -1,6 +1,5 @@
 import Cart from "../models/Cart.js";
 import Order from "../models/Order.js";
-import Product from "../models/Product.js";
 import { sendOrderEmail } from "../utils/sendEmail.js";
 
 export const createOrder = async (req, res) => {
@@ -47,7 +46,6 @@ export const createOrder = async (req, res) => {
     cart.items = [];
     await cart.save();
 
-    // Do NOT block response
     sendOrderEmail(order, req.user).catch(err =>
       console.log("Email error:", err)
     );
