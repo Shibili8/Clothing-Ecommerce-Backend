@@ -12,6 +12,9 @@ import { notFound, errorHandler } from "./middleware/errorHandler.js";
 dotenv.config();
 const app = express();
 
+// TRUST PROXY MUST COME FIRST (Render requirement)
+app.set("trust proxy", 1);
+
 // DB
 connectDB();
 
@@ -23,11 +26,15 @@ app.use(cookieParser());
 // CORS — FINAL WORKING CONFIG
 app.use(
   cors({
-    origin: [process.env.CLIENT_URL, "http://localhost:3000"],
+    origin: [
+      "http://localhost:3000",
+      "https://clothing-ecommerce-frontend.onrender.com"  // <-- UPDATE THIS
+    ],
     credentials: true,
   })
 );
 
+// Optional: Avoid long hung requests on Render
 app.use((req, res, next) => {
   res.setTimeout(45000, () => {
     console.log("Request timed out");
@@ -35,7 +42,6 @@ app.use((req, res, next) => {
   });
   next();
 });
-
 
 // Routes
 app.use("/api/auth", authRoutes);

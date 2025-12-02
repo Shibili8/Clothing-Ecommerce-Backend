@@ -45,17 +45,24 @@ export const loginUser = async (req, res) => {
         .json({ message: "Invalid email or password" });
     }
 
+    // Set JWT httpOnly cookie
     generateToken(res, user._id);
 
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
+    return res.status(200).json({
+      message: "Login successful",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      },
     });
+
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Login Error:", err.message);
+    return res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // =======================
 // LOGOUT
