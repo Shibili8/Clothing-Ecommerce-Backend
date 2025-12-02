@@ -13,7 +13,7 @@ if (!MONGO_URI) {
 
 const products = [
   { name: "Classic White T-Shirt", description: "Soft cotton tee perfect for everyday wear.", price: 499, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab", category: "Men", sizes: ["S", "M", "L", "XL"], stock: 50, }, 
-  { name: "Blue Denim Jeans", description: "Slim fit, comfortable stretch denim.", price: 1499, image: "https://images.unsplash.com/photo-1514996937319-344454492b37", category: "Men", sizes: ["30", "32", "34", "36"], stock: 30, },
+  { name: "Blue Denim Jeans", description: "Slim fit, comfortable stretch denim.", price: 1499, image: "https://res.cloudinary.com/da4a06plx/image/upload/v1764657310/blue_denim_jeans_wz28qy.jpg", category: "Men", sizes: ["30", "32", "34", "36"], stock: 30, },
   { name: "Black Hoodie", description: "Cozy fleece hoodie perfect for winter.", price: 1299, image: "https://res.cloudinary.com/da4a06plx/image/upload/v1764657113/Black_uyfpdk.jpg", category: "Men", sizes: ["M", "L", "XL"], stock: 40, },
   { name: "Men’s Formal Shirt", description: "Premium cotton shirt ideal for office use.", price: 899, image: "https://res.cloudinary.com/da4a06plx/image/upload/v1764655691/Men_s_Formal_Shirt_gg5zoa.webp", category: "Men", sizes: ["S", "M", "L", "XL"], stock: 25, },
   { name: "Grey Track Pants", description: "Comfortable joggers for gym and casual wear.", price: 699, image: "https://res.cloudinary.com/da4a06plx/image/upload/v1764655695/Grey_Track_Pants_z5x7dp.webp", category: "Men", sizes: ["M", "L", "XL"], stock: 35, },
