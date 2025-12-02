@@ -51,7 +51,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 
 // Error handlers
-app.use(notFound);
+app.use(notFound);~
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
